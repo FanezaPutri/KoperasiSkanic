@@ -80,4 +80,35 @@ class BuyerController extends Controller
 
         return view('buyer.orders', compact('orders'));
     }
+    public function cancelOrder($id)
+    {
+        $order = Order::with('items.product.category')
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('order_status', 'pending')
+            ->firstOrFail();
+
+        // Kembalikan stok untuk barang bertipe fisik
+        foreach ($order->items as $item) {
+            if ($item->product && $item->product->category && $item->product->category->type === 'physical') {
+                $item->product->increment('stock', $item->quantity);
+            }
+        }
+
+        // Ubah status pesanan menjadi dibatalkan
+        $order->update([
+            'order_status' => 'cancelled'
+        ]);
+
+        return back()->with('success', 'Pesanan ' . $order->order_code . ' berhasil dibatalkan dan stok dikembalikan.');
+    }
+    public function printReceipt($id)
+    {
+        $order = Order::with(['user', 'items.product'])
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return view('buyer.receipt', compact('order'));
+    }
 }

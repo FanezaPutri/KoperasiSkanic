@@ -17,6 +17,7 @@ Route::middleware('auth')->group(function () {
 
     // Khusus Penjaga Koperasi (Admin)
     Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/riwayat-pesanan', [AdminController::class, 'ordersHistory'])->name('admin.orders.history');
         Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
         Route::post('/admin/orders/{id}/complete', [AdminController::class, 'completeOrder'])->name('admin.order.complete');
         Route::get('/admin/laporan', [AdminController::class, 'report'])->name('admin.report');
@@ -33,6 +34,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/katalog', [BuyerController::class, 'index'])->name('buyer.dashboard');
         Route::post('/katalog/book/{id}', [BuyerController::class, 'book'])->name('buyer.book');
         Route::get('/pesanan-saya', [BuyerController::class, 'orders'])->name('buyer.orders');
+        Route::post('/pesanan-saya/{id}/batal', [BuyerController::class, 'cancelOrder'])->name('buyer.orders.cancel');
+        Route::get('/pesanan-saya/{id}/struk', [BuyerController::class, 'printReceipt'])->name('buyer.orders.receipt');
     });
 
 });

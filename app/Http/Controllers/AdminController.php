@@ -12,33 +12,41 @@ class AdminController extends Controller
 {
     public function index()
     {
-        // 1. Data Ringkasan Keuangan & Statistik
-        $totalIncome = Order::where('payment_status', 'paid')->sum('total_amount');
-        
-        // Menghitung keuntungan bersih: (harga jual - modal) * qty
-        $completedOrderIds = Order::where('order_status', 'completed')->pluck('id');
-        $netProfit = OrderItem::whereIn('order_id', $completedOrderIds)
-            ->selectRaw('SUM((price - cost_price) * quantity) as profit')
-            ->value('profit') ?? 0;
+        // 1. Pesanan yang siap/perlu diambil siswa (Pending)
+        $pendingOrders = Order::with(['user', 'items.product'])
+            ->where('order_status', 'pending')
+            ->latest()
+            ->get();
 
-        $pendingOrdersCount = Order::where('order_status', 'pending')->count();
+        // 2. Riwayat Pesanan (Selesai & Dibatalkan) untuk diletakkan di bawah dashboard
+        $historyOrders = Order::with(['user', 'items.product'])
+            ->whereIn('order_status', ['completed', 'cancelled'])
+            ->latest()
+            ->take(10)
+            ->get();
+
+        // Statistik Dashboard
+        $completedOrders = Order::with('items')->where('order_status', 'completed')->get();
+        $totalRevenue = $completedOrders->sum('total_amount');
+
+        $totalCost = 0;
+        foreach ($completedOrders as $order) {
+            foreach ($order->items as $item) {
+                $totalCost += ($item->cost_price * $item->quantity);
+            }
+        }
+        $netProfit = $totalRevenue - $totalCost;
+
+        $pendingCount = $pendingOrders->count();
         $lowStockCount = Product::where('stock', '<=', 5)->count();
 
-        // 2. Daftar Pesanan Masuk (Terbaru)
-        $orders = Order::with(['user', 'items.product'])->latest()->take(10)->get();
-
-        // 3. Daftar Produk untuk Pantau Stok
-        $products = Product::with('category')->latest()->get();
-        $categories = Category::all();
-
         return view('admin.dashboard', compact(
-            'totalIncome',
+            'pendingOrders',
+            'historyOrders',
+            'totalRevenue',
             'netProfit',
-            'pendingOrdersCount',
-            'lowStockCount',
-            'orders',
-            'products',
-            'categories'
+            'pendingCount',
+            'lowStockCount'
         ));
     }
 
@@ -80,5 +88,27 @@ class AdminController extends Controller
         $netProfit = $totalRevenue - $totalCost;
 
         return view('admin.report', compact('completedOrders', 'totalRevenue', 'totalCost', 'netProfit', 'period'));
+    }
+    public function ordersHistory(Request $request)
+    {
+        $status = $request->query('status', 'all');
+        $search = $request->query('search');
+
+        $query = Order::with(['user', 'items.product'])->latest();
+
+        if ($status !== 'all') {
+            $query->where('order_status', $status);
+        }
+
+        if ($search) {
+            $query->where('order_code', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+        }
+
+        $orders = $query->paginate(15);
+
+        return view('admin.orders-history', compact('orders', 'status', 'search'));
     }
 }

@@ -89,7 +89,7 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-3 px-3 font-semibold text-slate-800">{{ $product->name }}</td>
                             <td class="py-3 px-3">
-                                <span class="text-xs px-2.5 py-1 rounded-lg {{ $product->category->type === 'service' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600' }}">
+                                <span class="text-xs px-2.5 py-1 rounded-lg {{ $product->category->type === 'service' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-blue-50 text-blue-600 border border-blue-100' }}">
                                     {{ $product->category->name }}
                                 </span>
                             </td>
@@ -104,28 +104,28 @@
                                     <span class="text-xs text-slate-400 italic">Jasa</span>
                                 @endif
                             </td>
-                            <td class="py-3 px-3 text-right space-x-1">
-                                <!-- Tombol Modal Edit Sederhana -->
+                            <td class="py-3 px-3 text-right space-x-1 whitespace-nowrap">
+                                <!-- Tombol Buka Pop-up Edit -->
                                 <button type="button" onclick="document.getElementById('edit-modal-{{ $product->id }}').classList.remove('hidden')" 
-                                    class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-semibold transition">
-                                    <i class="fa-solid fa-pen mr-1"></i> Edit
+                                    class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-semibold transition inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-pen"></i> Edit
                                 </button>
 
-                                <!-- Form Hapus -->
-                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Hapus barang ini?')" class="inline">
+                                <!-- Form Hapus Barang -->
+                                <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus barang ini?')" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition">
-                                        <i class="fa-solid fa-trash mr-1"></i> Hapus
+                                    <button type="submit" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-semibold transition inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-trash"></i> Hapus
                                     </button>
                                 </form>
 
                                 <!-- Pop-up Modal Edit Barang -->
-                                <div id="edit-modal-{{ $product->id }}" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 text-left">
+                                <div id="edit-modal-{{ $product->id }}" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 text-left">
                                     <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-slate-100">
-                                        <div class="flex justify-between items-center mb-4">
-                                            <h4 class="font-bold text-slate-800 text-base">Ubah Data Barang</h4>
-                                            <button type="button" onclick="document.getElementById('edit-modal-{{ $product->id }}').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                                        <div class="flex justify-between items-center mb-4 border-b pb-3">
+                                            <h4 class="font-bold text-slate-800 text-base">Edit Data: {{ $product->name }}</h4>
+                                            <button type="button" onclick="document.getElementById('edit-modal-{{ $product->id }}').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
                                                 <i class="fa-solid fa-xmark text-lg"></i>
                                             </button>
                                         </div>
@@ -133,40 +133,44 @@
                                         <form action="{{ route('admin.products.update', $product->id) }}" method="POST" class="space-y-3">
                                             @csrf
                                             @method('PUT')
+                                            
                                             <div>
-                                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Barang</label>
-                                                <input type="text" name="name" value="{{ $product->name }}" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+                                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nama Barang / Jasa</label>
+                                                <input type="text" name="name" value="{{ $product->name }}" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </div>
+
                                             <div>
                                                 <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Kategori</label>
-                                                <select name="category_id" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+                                                <select name="category_id" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                     @foreach($categories as $cat)
-                                                        <option value="{{ $cat->id }}" {{ $product->category_id == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                                        <option value="{{ $cat->id }}" {{ $product->category_id == $cat->id ? 'selected' : '' }}>
+                                                            {{ $cat->name }} ({{ $cat->type === 'service' ? 'Jasa' : 'Fisik' }})
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
+
                                             <div class="grid grid-cols-2 gap-3">
                                                 <div>
                                                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Harga Modal (Rp)</label>
-                                                    <input type="number" name="cost_price" value="500" min="0" step="500" required
-                                                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    <input type="number" name="cost_price" value="{{ (int)$product->cost_price }}" min="0" step="500" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 </div>
-
                                                 <div>
                                                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Harga Jual (Rp)</label>
-                                                    <input type="number" name="price" value="500" min="0" step="500" required
-                                                        class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                    <input type="number" name="price" value="{{ (int)$product->price }}" min="0" step="500" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 </div>
                                             </div>
+
                                             <div>
                                                 <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Stok Barang</label>
-                                                <input type="number" name="stock" value="{{ $product->stock }}" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+                                                <input type="number" name="stock" value="{{ $product->stock }}" min="0" required class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </div>
-                                            <div class="pt-3 flex gap-2">
-                                                <button type="submit" class="flex-1 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-semibold transition">
+
+                                            <div class="pt-4 flex gap-2">
+                                                <button type="submit" class="flex-1 py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-blue-500/20">
                                                     Simpan Perubahan
                                                 </button>
-                                                <button type="button" onclick="document.getElementById('edit-modal-{{ $product->id }}').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition">
+                                                <button type="button" onclick="document.getElementById('edit-modal-{{ $product->id }}').classList.add('hidden')" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition">
                                                     Batal
                                                 </button>
                                             </div>

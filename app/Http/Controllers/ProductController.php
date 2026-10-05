@@ -33,27 +33,23 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
-
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
+        $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
+            'category_id' => 'required|exists:categories,id',
             'cost_price' => 'required|numeric|min:0',
+            'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
         ]);
 
-        $product->update($validated);
+        $product = Product::findOrFail($id);
+        $product->update([
+            'name' => $request->name,
+            'category_id' => $request->category_id,
+            'cost_price' => $request->cost_price,
+            'price' => $request->price,
+            'stock' => $request->stock,
+        ]);
 
         return back()->with('success', 'Data barang berhasil diperbarui!');
-    }
-
-    public function destroy($id)
-    {
-        $product = Product::findOrFail($id);
-        $product->delete();
-
-        return back()->with('success', 'Barang berhasil dihapus!');
     }
 }

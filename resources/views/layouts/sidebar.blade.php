@@ -1,5 +1,4 @@
 <aside class="w-64 h-screen bg-gradient-to-b from-blue-900 to-blue-800 text-white flex flex-col justify-between shadow-xl flex-shrink-0">
-    <!-- Area Atas: Logo & Menu Scrollable -->
     <div class="flex-1 flex flex-col min-h-0">
         <!-- Branding Koperasi Skanic -->
         <div class="p-5 border-b border-blue-700/50 flex items-center gap-3 flex-shrink-0">
@@ -12,8 +11,8 @@
             </div>
         </div>
 
-        <!-- Navigasi Menu (Bisa di-scroll mandiri) -->
-        <nav class="flex-1 overflow-y-auto p-4 space-y-1 text-sm">
+        <!-- Navigasi Menu Vertikal Rapi -->
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1.5 text-sm">
             @if(auth()->check() && auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-blue-700 text-white font-medium' : 'text-blue-100 hover:bg-blue-700/40' }} transition">
                     <div class="flex items-center gap-3">
@@ -69,7 +68,7 @@
         </nav>
     </div>
 
-    <!-- Info User Bawah (Tetap Nempel di Dasar Sidebar) -->
+    <!-- Info User Bawah -->
     <div class="p-4 border-t border-blue-700/50 text-xs text-blue-200 flex-shrink-0">
         Status: <span class="capitalize font-semibold text-white">{{ auth()->user()->role ?? 'Tamu' }}</span>
     </div>
