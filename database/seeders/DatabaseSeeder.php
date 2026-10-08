@@ -13,20 +13,24 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Akun Penjaga Koperasi
-        User::create([
-            'name' => 'Penjaga Koperasi',
-            'username' => 'admin',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Penjaga Koperasi',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
 
         // 2. Akun Contoh Pembeli (Siswa)
-        User::create([
-            'name' => 'Siswa Skanic',
-            'username' => 'siswa',
-            'password' => Hash::make('siswa123'),
-            'role' => 'buyer',
-        ]);
+        User::firstOrCreate(
+            ['username' => 'siswa'],
+            [
+                'name' => 'Siswa Skanic',
+                'password' => Hash::make('siswa123'),
+                'role' => 'buyer',
+            ]
+        );
 
         // 3. Kategori Sesuai Permintaan
         $categories = [
@@ -41,11 +45,16 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            Category::create([
-                'name' => $cat['name'],
-                'slug' => Str::slug($cat['name']),
-                'type' => $cat['type'],
-            ]);
+            Category::firstOrCreate(
+                ['slug' => Str::slug($cat['name'])],
+                [
+                    'name' => $cat['name'],
+                    'type' => $cat['type'],
+                ]
+            );
         }
+
+        // 4. Populate Produk & Layanan Jasa
+        $this->call(ProductSeeder::class);
     }
 }
