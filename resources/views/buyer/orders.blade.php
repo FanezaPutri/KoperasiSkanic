@@ -29,11 +29,48 @@
             <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Daftar Pesanan & Riwayat Booking</h2>
             <p class="text-xs text-slate-500 mt-0.5">Tunjukkan kode pesanan atau cetak struk saat mengambil barang di kasir koperasi</p>
         </div>
-        <a href="{{ route('buyer.dashboard') }}" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Pesan Barang Lagi</span>
-        </a>
+        <div class="flex items-center gap-2 self-start sm:self-center">
+            <a href="{{ route('buyer.cart') }}" class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold border border-blue-200 transition active:scale-95 flex items-center gap-1.5">
+                <i class="fa-solid fa-cart-shopping text-xs"></i>
+                <span>Keranjang</span>
+            </a>
+            <a href="{{ route('buyer.dashboard') }}" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Pesan Lagi</span>
+            </a>
+        </div>
     </div>
+
+    <!-- Opsi Satukan Pesanan Pending Menjadi 1 Struk -->
+    @php
+        $pendingOrdersCount = $orders->where('order_status', 'pending')->count();
+    @endphp
+
+    @if($pendingOrdersCount >= 2)
+        <div class="p-5 sm:p-6 bg-gradient-to-br from-blue-50 via-indigo-50/70 to-blue-50 border border-blue-200/80 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 text-xl shadow-md shadow-blue-500/30">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-sm font-extrabold text-slate-900">Satukan {{ $pendingOrdersCount }} Pesanan Pending Menjadi 1 Struk</h3>
+                        <span class="px-2 py-0.5 bg-blue-600 text-white text-[10px] font-extrabold rounded-full shadow-2xs">Solusi 1 Struk</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                        Kamu memiliki {{ $pendingOrdersCount }} pesanan terpisah yang belum diambil (misal Susu & Pensil). Klik tombol di samping untuk menggabungkannya ke dalam <strong>1 kode pengambilan & 1 lembar struk</strong>.
+                    </p>
+                </div>
+            </div>
+            <form action="{{ route('buyer.orders.merge') }}" method="POST" onsubmit="return confirm('Apakah kamu yakin ingin menyatukan {{ $pendingOrdersCount }} pesanan pending menjadi 1 struk & 1 kode pengambilan?')" class="flex-shrink-0">
+                @csrf
+                <button type="submit" class="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-extrabold shadow-md shadow-blue-500/30 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-object-group text-sm"></i>
+                    <span>Satukan Jadi 1 Struk</span>
+                </button>
+            </form>
+        </div>
+    @endif
 
     <!-- Order List Cards -->
     <div class="space-y-4">

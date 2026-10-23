@@ -6,9 +6,12 @@ use App\Http\Controllers\BuyerController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
-// Rute Login & Logout
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/login', [AuthController::class, 'showLogin']);
+// Rute Beranda (Landing Page) & Autentikasi
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -33,7 +36,17 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:buyer')->group(function () {
         Route::get('/katalog', [BuyerController::class, 'index'])->name('buyer.dashboard');
         Route::post('/katalog/book/{id}', [BuyerController::class, 'book'])->name('buyer.book');
+
+        // Keranjang Belanja & Checkout
+        Route::get('/keranjang', [BuyerController::class, 'cart'])->name('buyer.cart');
+        Route::post('/keranjang/tambah/{id}', [BuyerController::class, 'addToCart'])->name('buyer.cart.add');
+        Route::post('/keranjang/update/{id}', [BuyerController::class, 'updateCart'])->name('buyer.cart.update');
+        Route::delete('/keranjang/hapus/{id}', [BuyerController::class, 'removeFromCart'])->name('buyer.cart.remove');
+        Route::post('/keranjang/kosongkan', [BuyerController::class, 'clearCart'])->name('buyer.cart.clear');
+        Route::post('/keranjang/checkout', [BuyerController::class, 'checkout'])->name('buyer.cart.checkout');
+
         Route::get('/pesanan-saya', [BuyerController::class, 'orders'])->name('buyer.orders');
+        Route::post('/pesanan-saya/satukan', [BuyerController::class, 'mergePendingOrders'])->name('buyer.orders.merge');
         Route::post('/pesanan-saya/{id}/batal', [BuyerController::class, 'cancelOrder'])->name('buyer.orders.cancel');
         Route::get('/pesanan-saya/{id}/struk', [BuyerController::class, 'printReceipt'])->name('buyer.orders.receipt');
     });

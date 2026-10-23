@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Koperasi Skanic - Sistem Koperasi Digital' }}</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,7 +89,19 @@
             </div>
 
             <!-- User Status & Logout -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                @if(auth()->check() && auth()->user()->role === 'buyer')
+                    <a href="{{ route('buyer.cart') }}" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition flex items-center justify-center border border-slate-200/60 active:scale-95" title="Keranjang Belanja (1 Struk)">
+                        <i class="fa-solid fa-cart-shopping text-sm sm:text-base"></i>
+                        @php
+                            $headerCartCount = count(session('cart', []));
+                        @endphp
+                        <span id="header-cart-badge" class="{{ $headerCartCount > 0 ? '' : 'hidden' }} absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-sm transition-transform duration-200">
+                            {{ $headerCartCount }}
+                        </span>
+                    </a>
+                @endif
+
                 <div class="flex items-center gap-2.5 px-3 py-1.5 bg-slate-100/80 rounded-full border border-slate-200/60">
                     <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
                         {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
@@ -117,6 +130,9 @@
         </main>
     </div>
 
+    <!-- Global Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
     <!-- JS Sederhana untuk Toggle Sidebar di HP -->
     <script>
         function toggleSidebar() {
@@ -125,6 +141,83 @@
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
         }
+
+        window.showToast = function(message, type = 'success', actionText = null, actionUrl = null) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto transform transition-all duration-300 ease-out translate-y-[-10px] opacity-0 bg-slate-900/95 backdrop-blur-md text-white border ${type === 'success' ? 'border-emerald-500/40 shadow-emerald-950/20' : 'border-rose-500/40 shadow-rose-950/20'} rounded-2xl p-3.5 shadow-2xl flex items-center gap-3`;
+            
+            const iconHtml = type === 'success' 
+                ? `<div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0"><i class="fa-solid fa-check"></i></div>`
+                : `<div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm flex-shrink-0"><i class="fa-solid fa-circle-exclamation"></i></div>`;
+
+            let actionHtml = '';
+            if (actionText && actionUrl) {
+                actionHtml = `<a href="${actionUrl}" class="ml-auto text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl transition whitespace-nowrap active:scale-95 flex items-center gap-1">${actionText} <i class="fa-solid fa-arrow-right text-[10px]"></i></a>`;
+            }
+
+            toast.innerHTML = `
+                ${iconHtml}
+                <div class="flex-1 min-w-0 pr-1">
+                    <p class="text-xs font-semibold text-slate-100 leading-snug">${message}</p>
+                </div>
+                ${actionHtml}
+                <button type="button" class="text-slate-400 hover:text-white p-1 ml-1 flex-shrink-0 transition cursor-pointer" onclick="this.closest('div.pointer-events-auto').remove()">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-10px]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        };
+
+        window.updateCartIndicators = function(data) {
+            const headerBadge = document.getElementById('header-cart-badge');
+            if (headerBadge) {
+                if (data.cartCount > 0) {
+                    headerBadge.innerText = data.cartCount;
+                    headerBadge.classList.remove('hidden');
+                    headerBadge.classList.add('scale-125');
+                    setTimeout(() => headerBadge.classList.remove('scale-125'), 200);
+                } else {
+                    headerBadge.classList.add('hidden');
+                }
+            }
+
+            const sidebarBadge = document.getElementById('sidebar-cart-badge');
+            if (sidebarBadge) {
+                if (data.cartCount > 0) {
+                    sidebarBadge.innerText = data.cartCount;
+                    sidebarBadge.classList.remove('hidden');
+                } else {
+                    sidebarBadge.classList.add('hidden');
+                }
+            }
+
+            const floatingBar = document.getElementById('floating-cart-bar');
+            const floatingCount = document.getElementById('floating-cart-count-text');
+            const floatingTotal = document.getElementById('floating-cart-total-text');
+            if (floatingBar && floatingCount && floatingTotal) {
+                if (data.cartCount > 0) {
+                    floatingCount.innerText = `${data.cartCount} Jenis Produk (${data.cartTotalUnits} Unit)`;
+                    floatingTotal.innerText = `Total: ${data.cartTotalFormatted}`;
+                    floatingBar.classList.remove('hidden');
+                } else {
+                    floatingBar.classList.add('hidden');
+                }
+            }
+        };
     </script>
 
     @stack('scripts')

@@ -86,25 +86,12 @@
                 </button>
             </form>
 
-            <!-- Quick Demo Credentials Box -->
-            <div class="mt-8 pt-5 border-t border-slate-100">
-                <p class="text-[11px] font-semibold text-slate-400 text-center uppercase tracking-wider mb-2.5">
-                    Akun Pengujian Demo (Klik untuk Isi Cepat)
-                </p>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="fillCredentials('admin', 'admin123')" class="px-3 py-2 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl text-left transition group">
-                        <div class="flex items-center gap-1.5 text-blue-600 font-bold text-xs">
-                            <i class="fa-solid fa-shield-halved text-[11px]"></i> Admin
-                        </div>
-                        <div class="font-mono text-[11px] text-slate-500 group-hover:text-slate-700 truncate mt-0.5">admin / admin123</div>
-                    </button>
-                    <button type="button" onclick="fillCredentials('siswa', 'siswa123')" class="px-3 py-2 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl text-left transition group">
-                        <div class="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
-                            <i class="fa-solid fa-user-graduate text-[11px]"></i> Siswa
-                        </div>
-                        <div class="font-mono text-[11px] text-slate-500 group-hover:text-slate-700 truncate mt-0.5">siswa / siswa123</div>
-                    </button>
-                </div>
+            <!-- Kembali ke Landing Page -->
+            <div class="mt-8 pt-5 border-t border-slate-100 text-center">
+                <a href="{{ route('landing') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-arrow-left text-[11px]"></i>
+                    <span>Kembali ke Halaman Utama</span>
+                </a>
             </div>
 
         </div>
@@ -127,11 +114,6 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
-        }
-
-        function fillCredentials(user, pass) {
-            document.getElementById('input-username').value = user;
-            document.getElementById('input-password').value = pass;
         }
     </script>
 

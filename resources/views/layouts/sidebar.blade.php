@@ -62,6 +62,20 @@
                     <span>Katalog Semua</span>
                 </a>
 
+                <a href="{{ route('buyer.cart') }}" 
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 {{ request()->routeIs('buyer.cart') ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60' }}">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-cart-shopping w-4 text-center {{ request()->routeIs('buyer.cart') ? 'text-white' : 'text-cyan-400' }}"></i> 
+                        <span>Keranjang (1 Struk)</span>
+                    </div>
+                    @php
+                        $sidebarCartCount = count(session('cart', []));
+                    @endphp
+                    <span id="sidebar-cart-badge" class="{{ $sidebarCartCount > 0 ? '' : 'hidden' }} px-2 py-0.5 text-[10px] bg-blue-500 text-white font-extrabold rounded-full shadow-sm">
+                        {{ $sidebarCartCount }}
+                    </span>
+                </a>
+
                 <a href="{{ route('buyer.orders') }}" 
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 {{ request()->routeIs('buyer.orders') ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/60' }}">
                     <i class="fa-solid fa-receipt w-4 text-center {{ request()->routeIs('buyer.orders') ? 'text-white' : 'text-amber-400' }}"></i> 
