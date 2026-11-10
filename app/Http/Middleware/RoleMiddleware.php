@@ -11,11 +11,17 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            // Jika bukan role yang diizinkan, kembalikan ke katalog atau dashboard masing-masing
-            return Auth::user()->role === 'admin'
-                ? redirect()->route('admin.dashboard')
-                : redirect()->route('buyer.dashboard');
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if (Auth::user()->role !== $role) {
+            // Arahkan sesuai role masing-masing jika coba akses rute role lain
+            return match (Auth::user()->role) {
+                'superadmin' => redirect()->route('users.index'),
+                'admin'      => redirect()->route('admin.dashboard'),
+                default      => redirect()->route('buyer.dashboard'),
+            };
         }
 
         return $next($request);

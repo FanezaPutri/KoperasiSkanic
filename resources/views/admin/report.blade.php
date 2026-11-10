@@ -103,7 +103,7 @@
         
         <!-- Header Dokumen Cetak -->
         <div class="hidden print:block mb-6 text-center border-b-2 border-slate-800 pb-4">
-            <h1 class="text-xl font-bold tracking-tight">KOPERASI SKANIC - SMK NEGERI 1</h1>
+            <h1 class="text-xl font-bold tracking-tight">KOPERASI SKANIC - SMK NEGERI 1 CIOMAS</h1>
             <p class="text-xs text-slate-600">Laporan Resmi Pembukuan Transaksi & Rekap Keuntungan</p>
             <p class="text-[10px] text-slate-400 mt-1">Dicetak pada: {{ date('d F Y, H:i') }}</p>
         </div>

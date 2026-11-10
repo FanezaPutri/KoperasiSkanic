@@ -14,10 +14,10 @@ return new class extends Migration
     Schema::create('users', function (Blueprint $table) {
         $table->id();
         $table->string('name');
+        $table->string('kelas')->nullable(); // nullable karena admin & penjaga koperasi tidak punya kelas
         $table->string('username')->unique(); // login pakai username
         $table->string('password');
-        $table->enum('role', ['admin', 'buyer'])->default('buyer'); // penjaga koperasi atau pembeli
-        $table->rememberToken();
+        $table->string('role')->default('buyer');
         $table->timestamps();
     });
 }

@@ -30,6 +30,17 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('siswa123'),
                 'role' => 'buyer',
             ]
+
+        );
+
+        // Akun Pengelola / Superadmin
+        User::firstOrCreate(
+            ['username' => 'superadmin'],
+            [
+                'name'     => 'Administrator Sekolah',
+                'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                'role'     => 'superadmin',
+            ]
         );
 
         // 3. Kategori Sesuai Permintaan

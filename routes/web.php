@@ -50,5 +50,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/pesanan-saya/{id}/batal', [BuyerController::class, 'cancelOrder'])->name('buyer.orders.cancel');
         Route::get('/pesanan-saya/{id}/struk', [BuyerController::class, 'printReceipt'])->name('buyer.orders.receipt');
     });
-
+    // Khusus Superadmin (Kelola Akun)
+    Route::middleware('role:superadmin')->group(function () {
+        Route::get('/manage-users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+        Route::post('/manage-users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
+    });
+    
 });
