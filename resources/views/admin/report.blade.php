@@ -20,26 +20,40 @@
         </button>
     </div>
 
-    <!-- Filter Periode (Sembunyi saat cetak) -->
-    <div class="flex flex-wrap items-center gap-2 no-print p-1.5 bg-slate-200/60 rounded-2xl w-fit text-xs font-semibold">
-        <span class="text-slate-500 font-bold px-2.5 py-1 text-[11px] uppercase tracking-wider">Periode:</span>
-        <a href="{{ route('admin.report', ['period' => 'all']) }}" 
-           class="px-4 py-2 rounded-xl transition-all duration-150 {{ ($period ?? 'all') === 'all' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900' }}">
-            Semua Waktu
-        </a>
-        <a href="{{ route('admin.report', ['period' => 'today']) }}" 
-           class="px-4 py-2 rounded-xl transition-all duration-150 {{ ($period ?? '') === 'today' ? 'bg-blue-600 text-white shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900' }}">
-            Hari Ini
-        </a>
-        <a href="{{ route('admin.report', ['period' => 'week']) }}" 
-           class="px-4 py-2 rounded-xl transition-all duration-150 {{ ($period ?? '') === 'week' ? 'bg-blue-600 text-white shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900' }}">
-            Minggu Ini
-        </a>
-        <a href="{{ route('admin.report', ['period' => 'month']) }}" 
-           class="px-4 py-2 rounded-xl transition-all duration-150 {{ ($period ?? '') === 'month' ? 'bg-blue-600 text-white shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900' }}">
-            Bulan Ini
-        </a>
-    </div>
+    <!-- Filter Tanggal (Sembunyi saat cetak) -->
+        <div class="no-print bg-slate-200/60 p-2 rounded-2xl w-fit">
+            <form action="{{ route('admin.report') }}" method="GET" class="flex flex-wrap items-center gap-3 text-xs">
+                <span class="text-slate-600 font-bold px-1 uppercase tracking-wider text-[11px]">Periode:</span>
+                
+                <div class="flex items-center space-x-1.5">
+                    <label for="start_date" class="text-slate-600 font-semibold">Dari:</label>
+                    <input type="date" 
+                           id="start_date" 
+                           name="start_date" 
+                           value="{{ request('start_date') }}" 
+                           class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 outline-none focus:border-blue-500 text-xs font-medium">
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <label for="end_date" class="text-slate-600 font-semibold">Ke:</label>
+                    <input type="date" 
+                           id="end_date" 
+                           name="end_date" 
+                           value="{{ request('end_date') }}" 
+                           class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 outline-none focus:border-blue-500 text-xs font-medium">
+                </div>
+
+                <button type="submit" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">
+                    Filter
+                </button>
+
+                @if(request('start_date') || request('end_date'))
+                    <a href="{{ route('admin.report') }}" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-600 rounded-xl font-semibold transition border border-slate-300">
+                        Reset
+                    </a>
+                @endif
+            </form>
+        </div>
 
     <!-- Ringkasan Kartu Finansial -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">

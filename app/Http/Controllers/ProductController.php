@@ -8,10 +8,19 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->latest()->get();
+        $query = Product::with('category');
+
+        if ($request->filled('category')) {
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('slug', $request->input('category'));
+            });
+        }
+
+        $products = $query->latest()->get();
         $categories = Category::all();
+
         return view('admin.products.index', compact('products', 'categories'));
     }
 
@@ -51,5 +60,13 @@ class ProductController extends Controller
         ]);
 
         return back()->with('success', 'Data barang berhasil diperbarui!');
+    }
+
+    public function destroy(string $id)
+    {
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return back()->with('success', 'Barang berhasil dihapus!');
     }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -56,39 +54,50 @@ class AdminController extends Controller
         $order = Order::findOrFail($id);
         $order->update(['order_status' => 'completed']);
 
-        return back()->with('success', 'Pesanan ' . $order->order_code . ' berhasil diselesaikan!');
+        return back()->with('success', 'Pesanan '.$order->order_code.' berhasil diselesaikan!');
     }
+
     public function report(Request $request)
     {
-        $period = $request->query('period', 'all');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         $query = Order::with(['user', 'items.product'])
             ->where('order_status', 'completed');
 
-        if ($period === 'today') {
-            $query->whereDate('created_at', now()->today());
-        } elseif ($period === 'week') {
-            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-        } elseif ($period === 'month') {
-            $query->whereMonth('created_at', now()->month)
-                  ->whereYear('created_at', now()->year);
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                $startDate.' 00:00:00',
+                $endDate.' 23:59:59',
+            ]);
+        } elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate);
         }
 
         $completedOrders = $query->latest()->get();
 
         $totalRevenue = $completedOrders->sum('total_amount');
-        
-        $totalCost = 0;
-        foreach ($completedOrders as $order) {
-            foreach ($order->items as $item) {
-                $totalCost += ($item->cost_price * $item->quantity);
-            }
-        }
+
+        $totalCost = $completedOrders->sum(function ($order) {
+            return $order->items->sum(function ($item) {
+                return $item->cost_price * $item->quantity;
+            });
+        });
 
         $netProfit = $totalRevenue - $totalCost;
 
-        return view('admin.report', compact('completedOrders', 'totalRevenue', 'totalCost', 'netProfit', 'period'));
+        return view('admin.report', compact(
+            'completedOrders',
+            'totalRevenue',
+            'totalCost',
+            'netProfit',
+            'startDate',
+            'endDate',
+        ));
     }
+
     public function ordersHistory(Request $request)
     {
         $status = $request->query('status', 'all');
@@ -102,9 +111,9 @@ class AdminController extends Controller
 
         if ($search) {
             $query->where('order_code', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                ->orWhereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
         }
 
         $orders = $query->paginate(15);

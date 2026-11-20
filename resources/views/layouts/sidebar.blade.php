@@ -102,7 +102,12 @@
             @endphp
 
             @foreach($sidebarCategories as $slug => $cat)
-                <a href="{{ route('buyer.dashboard', ['category' => $slug]) }}" 
+                @php
+                    $categoryUrl = auth()->check() && auth()->user()->role === 'admin'
+                        ? route('admin.products.index', ['category' => $slug])
+                        : route('buyer.dashboard', ['category' => $slug]);
+                @endphp
+                <a href="{{ $categoryUrl }}" 
                    class="flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all duration-150 {{ request('category') === $slug ? 'bg-blue-600/90 text-white font-medium shadow-sm' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40' }}">
                     <i class="fa-solid {{ $cat['icon'] }} w-4 text-center {{ request('category') === $slug ? 'text-white' : $cat['color'] }}"></i> 
                     <span class="truncate">{{ $cat['name'] }}</span>
